@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Onboarding New Services</title>
+
+    <!-- update the version number as needed -->
+    <script defer src="/__/firebase/8.6.5/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script defer src="/__/firebase/8.6.5/firebase-auth.js"></script>
+    <script defer src="/__/firebase/8.6.5/firebase-firestore.js"></script>
+    <script defer src="/__/firebase/8.6.5/firebase-storage.js"></script>
+    <script defer src="/__/firebase/8.6.5/firebase-analytics.js"></script>
+    <!-- 
+      initialize the SDK after all desired features are loaded, set useEmulator to false
+      to avoid connecting the SDK to running emulators.
+    -->
+    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="normalize.css" rel="stylesheet">
+    <style media="screen">
+      body { background: #ECEFF1; color: #3C3C3C; font-family: 'Poppins', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+      header { text-align: center; }
+      header .close { right: 50px; position: absolute; background: transparent; color: #FFA41D; border: 0; height: 20px; text-decoration: underline; cursor: pointer; }
+      header h1 { font-size: 20px; font-weight: 500; margin: 0 0 71px; color: #606060; }
+      header h2 { font-family: 'Poppins'; font-size: 16px; letter-spacing: .002em; margin: 37px 0 18px; color: #FFA41D; }
+      label { font-weight: 600; margin-bottom: 8px; }
+      label, input, select, button { font-family: 'Poppins'; font-size: 14px; line-height: 21px; display: block; }
+      .chips { margin: 0 auto; }
+      .chips input[type='checkbox'] { display: inline; appearance: none; }
+      .chips input[type='checkbox'] + label { --active: #606060; --bg: #FFFF; display: inline-block; vertical-align: top; font-size: 12px; font-weight: normal; line-height: 18px; letter-spacing: .002em; background: var(--bc, var(--bg)); color: var(--fg, var(--active)); border: 0.6px solid #606060; border-radius: 200px; padding: 7px 13px; cursor: pointer; }
+      .chips input[type='checkbox']:checked + label { --bc: var(--active); --fg: var(--bg); }
+      .chips input[type='checkbox']:disabled + label { cursor: not-allowed; opacity: .6; }
+      .chips input[type='checkbox']:not(:checked):not(:disabled):hover + label { border-color: #FFA41D; }
+      .details { background: #E5E5E5; padding: 23px 36px; margin: 36px auto 0; }
+      .details button { display: block; width: 100%; background: #FFA41D; color: #FFFF; padding: 12px; margin-top: 70px; border: 0; border-radius: 4px; filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.05)); cursor: pointer; }
+      .details input, .details select { font-weight: 400; margin-bottom: 16px; width: 100%; color: inherit; padding: 12px 17.5px; border: 0; border-radius: 4px; box-sizing: border-box; appearance: none; }
+      .details input:focus-visible, .details select:focus-visible { outline-color: #FFA41D; }
+      .details, .chips { max-width: 421px; box-sizing: border-box; }
+      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
+      @media (max-width: 600px) {
+        header .close { background: #FFA41D; color: #FFFF; border-radius: 100%; width: 20px; text-decoration: none; }
+        header .close span:first-child { display: none; }
+        .chips { padding: 0 20px; }
+        .details { background: none; max-width: 421px; padding: 20px; }
+        .details input, .details select, .details button { max-width: 315px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <button id="close" class="close" aria-label="Close">
+        <span>Salir</span>
+        <span aria-hidden="true">×</span>
+      </button>
+      <h2>Paso 2 de 2</h2>
+      <h1>¿Qué servicios ofreces?</h1>
+      <p>Los servicios que los clientes podrán agendar</p>
+    </header>
+    <section class="chips">
+      <h3>Servicios de Peluquería</h3>
+      <input type="checkbox" id="mani-pedi" value="Mani-Pedi">
+      <label for="mani-pedi">Mani-Pedi</label>
+      <input type="checkbox" id="barberia" value="Barbería">
+      <label for="barberia">Barbería</label>
+      <input type="checkbox" id="corte" value="Corte">
+      <label for="corte">Corte</label>
+      <input type="checkbox" id="color" value="Color">
+      <label for="color">Color</label>
+      <input type="checkbox" id="alisado" value="Alisado">
+      <label for="alisado">Alisado</label>
+      <input type="checkbox" id="cepillado" value="Cepillado">
+      <label for="cepillado">Cepillado</label>
+      <input type="checkbox" id="depilacion" value="Depilacion">
+      <label for="depilacion">Depilación</label>
+    </section>
+    <section class="chips">
+      <h3>Servicios de Estética</h3>
+      <input type="checkbox" id="reductor" value="Reductor">
+      <label for="reductor">Reductor</label>
+      <input type="checkbox" id="facial" value="Facial">
+      <label for="facial">Facial</label>
+      <input type="checkbox" id="masajes" value="Masajes">
+      <label for="masajes">Masajes</label>
+      <input type="checkbox" id="laser" value="Laser">
+      <label for="laser">Laser</label>
+    </section>
+    <section class="details">
+      <label for="type">Modalidad de servicio:</label>
+      <select name="type" id="type">
+        <option value="in_house">Independiente</option>
+        <option value="bussines">Establecimiento</option>
+      </select>
+      <label for="desc">Descripción: </label>
+      <input id="desc" type="text" />
+      <label for="price">Precio: </label>
+      <input id="price" type="number" />
+      <label for="duration">Duración: </label>
+      <input id="duration" type="number" />
+      <button id="save_service">Guardar cambios</button>
+    </section>
+    <p id="load">Firebase SDK Loading&hellip;</p>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const loadEl = document.querySelector('#load');
+        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+        // // The Firebase SDK is initialized and available here!
+        //
+        // firebase.auth().onAuthStateChanged(user => { });
+        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
+        // firebase.firestore().doc('/foo/bar').get().then(() => { });
+        // firebase.functions().httpsCallable('yourFunction')().then(() => { });
+        // firebase.messaging().requestPermission().then(() => { });
+        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
+        // firebase.analytics(); // call to activate
+        // firebase.analytics().logEvent('tutorial_completed');
+        // firebase.performance(); // call to activate
+        //
+        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+
+        let expertData = null
+        const db = firebase.firestore();
+        const expertsRef = db.collection('experts');
+        const servicesRef = db.collection('services');
+
+        firebase.auth()
+          .onAuthStateChanged(user => {
+            if (user) {
+              expertsRef.doc(user.uid)
+                .get()
+                .then((doc) => {
+                  let expert = {
+                    name: user.displayName,
+                    email: user.email,
+                    tele: user.phoneNumber,
+                    picture_url: user.photoURL
+                  } 
+                  if (doc.exits) {
+                    // Set updates
+                    expert = {
+                      ...doc.data(),
+                      ...expert
+                    }
+                  }
+                  // Save
+                  expertsRef.doc(user.uid).set(expert)
+                  // Take fresh expert data to embed into service
+                  expertData = { id: user.uid, name: expert.name, picture_url: expert.picture_url }
+                })
+                .catch((error) => {
+                  console.error(error)
+                  loadEl.textContent = 'Error trying to search for an existing User at Cloud Firestore, check the console.';
+                })
+            } else {
+              // Back to login
+              window.location.assign('/')
+            }
+          });
+        
+        const saveEl = document.getElementById('save_service');
+        saveEl.addEventListener('click', function () {
+          // Grab all the fields
+          const txtDesc = document.getElementById('desc')
+          const numbPrice = document.getElementById('price')
+          const numbDuration = document.getElementById('duration')
+          const enumType = document.getElementById('type')
+          // Grab all chips
+          const chipsEl = document.querySelectorAll(".chips input[type='checkbox']")
+          const chips = []
+          chipsEl.forEach(el => {
+            if (el.checked) {
+              chips.push(el.value)
+            }
+          })
+          const data = {
+            desc: txtDesc.value,
+            type: enumType.value,
+            price: parseInt(numbPrice.value, 10),
+            duration: parseInt(numbDuration.value),
+            expert: expertData,
+            categories: chips
+          }
+          // Save
+          servicesRef.doc().set(data)
+          // Clean
+          txtDesc.value = ''
+          numbPrice.value = ''
+          numbDuration.value = ''
+          enumType.selectedIndex = 0
+          chipsEl.forEach(el => {
+            el.checked = false
+          })
+        });
+
+        const closeEl = document.getElementById('close');
+        closeEl.addEventListener('click', function () {
+          firebase.auth().signOut();
+        });
+
+        try {
+          let app = firebase.app();
+          let features = [
+            'auth', 
+            'database', 
+            'firestore',
+            'functions',
+            'messaging', 
+            'storage', 
+            'analytics', 
+            'remoteConfig',
+            'performance',
+          ].filter(feature => typeof app[feature] === 'function');
+          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
+        } catch (e) {
+          console.error(e);
+          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
+        }
+      });
+    </script>
+  </body>
+</html>
