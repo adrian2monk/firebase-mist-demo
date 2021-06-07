@@ -9,6 +9,7 @@
     <script defer src="/__/firebase/8.6.5/firebase-app.js"></script>
     <!-- include only the Firebase features as you need -->
     <script defer src="/__/firebase/8.6.5/firebase-auth.js"></script>
+    <script defer src="/__/firebase/8.6.5/firebase-firestore.js"></script>
     <script defer src="/__/firebase/8.6.5/firebase-analytics.js"></script>
     <!-- 
       initialize the SDK after all desired features are loaded, set useEmulator to false
@@ -78,6 +79,7 @@
         //
         // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
 
+        const expertsRef = firebase.firestore().collection('experts');
         const provider = new firebase.auth.FacebookAuthProvider();
         provider.addScope('email');
         // provider.addScope('user_birthday');
@@ -99,7 +101,15 @@
               // TODO Get something from facebook user profile such as its date of birthday and mobile phone
             }
             if (result.user) {
-              window.location.assign('./onboarding.html')
+              expertsRef.doc(result.user.uid)
+                .get()
+                .then((doc) => {
+                  if (doc.exists) {
+                    window.location.assign('./onboarding.html')
+                  } else {
+                    window.location.assign('./schedule.html')
+                  }
+                })
             }
           }).catch((error) => {
             console.error(error)

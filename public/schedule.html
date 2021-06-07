@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Check your Schedule</title>
+
+    <!-- update the version number as needed -->
+    <script defer src="/__/firebase/8.6.5/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script defer src="/__/firebase/8.6.5/firebase-auth.js"></script>
+    <script defer src="/__/firebase/8.6.5/firebase-firestore.js"></script>
+    <script defer src="/__/firebase/8.6.5/firebase-analytics.js"></script>
+    <!-- 
+      initialize the SDK after all desired features are loaded, set useEmulator to false
+      to avoid connecting the SDK to running emulators.
+    -->
+    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="normalize.css" rel="stylesheet">
+    <style media="screen">
+      body { background: #ECEFF1; color: #3C3C3C; font-family: 'Poppins', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+      header { text-align: center; }
+      header .close { right: 50px; position: absolute; background: transparent; color: #FFA41D; border: 0; height: 20px; text-decoration: underline; cursor: pointer; }
+      header h1 { font-size: 20px; font-weight: 500; margin: 0 0 71px; color: #606060; }
+      header h2 { font-family: 'Poppins'; font-size: 16px; letter-spacing: .002em; margin: 37px 0 18px; color: #FFA41D; }
+      label { margin-right: 8px; }
+      label, input, button { font-family: 'Poppins'; font-size: 14px; line-height: 21px; border-radius: 4px; }
+      .agenda { background: #E5E5E5; padding: 23px 36px; margin: 36px auto 0; max-width: 421px; box-sizing: border-box; }
+      .agenda .heading { display: flex; justify-content: space-around; }
+      .agenda button { display: block; width: 100%; background: #FFA41D; color: #FFFF; padding: 12px; margin-top: 70px; border: 0; filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.05)); cursor: pointer; }
+      .agenda input { font-weight: 400; margin-bottom: 16px; width: 30%; color: inherit; padding: 12px 17.5px; border: 0; box-sizing: border-box; appearance: none; }
+      .agenda input:invalid { border: 1px solid #CD0B4A; }
+      .agenda input:disabled { background: #F8F8F8; opacity: .6; }
+      .agenda input:focus-visible { outline-color: #FFA41D; }
+      .agenda input[type='checkbox'] { --background: #FFFF; --border: #3C3C3C; --active: #0D919D; display: inline-block; position: relative; vertical-align: text-top; height: 21px; width: 21px; padding: 0; background: var(--b, var(--background)); transition: background .3s, border-color .3s, box-shadow .2s; }
+      .agenda input[type='checkbox'] + label { display: inline-block; cursor: pointer; width: 20%; }
+      .agenda input[type='checkbox']::after { content: ''; display: inline-block; position: absolute; transition: transform var(--d-t, .3s) var(--d-t-e, ease), opacity var(--d-o, .2s); }
+      .agenda input[type='checkbox']:not(.switch)::after { width: 5px; height: 9px; top: 4px; left: 7px; border: 2px solid #FFFF; border-top: 0; border-left: 0; opacity: var(--o, 0); transform: rotate(var(--r, 20deg)); }
+      .agenda input[type='checkbox']:not(.switch):checked { --o: 1; --r: 43deg; --b: var(--active); --bc: var(--active); --d-o: .3s; --d-t: .6s; --d-t-e: cubic-bezier(.2, .85, .32, 1.2); }
+      .agenda input[type='checkbox'].switch { width: 38px; border-radius: 11px; float: right; }
+      .agenda input[type='checkbox'].switch::after { left: 3px; top: 3px; border-radius: 50%; width: 15px; height: 15px; background: var(--ab, var(--border)); transform: translateX(var(--x, 0)); }
+      .agenda input[type='checkbox'].switch:checked { --b: var(--active); --ab: var(--background); --x: 17px; }
+      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
+      @media (max-width: 600px) {
+        header .close { background: #FFA41D; color: #FFFF; border-radius: 100%; width: 20px; text-decoration: none; }
+        header .close span:first-child { display: none; }
+        .agenda { background: none; max-width: 421px; padding: 20px; }
+        .agenda button { max-width: 315px; }
+        .agenda input, .agenda input[type='checkbox'] + label { width: 25%; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <button id="close" class="close" aria-label="Close">
+        <span>Salir</span>
+        <span aria-hidden="true">×</span>
+      </button>
+      <h2>Paso 1 de 2</h2>
+      <h1>Queremos conocer más de tu operación</h1>
+      <p>Esta es la información que verán tus clientes</p>
+    </header>
+    <section class="agenda">
+      <header class="heading">
+        <p>Día</p>
+        <p>Abre</p>
+        <p>Cierra</p>
+      </header>
+      <!-- Sunday -->
+      <input type="checkbox" id="sun" value="Dom">
+      <label for="sun">&nbsp;Domingo</label>
+      <input id="sun_start" type="string" pattern="([0-1]?[0-9]|2[0-3]):[0-5][0-9]" />
+      <span>&nbsp;-&nbsp;</span>
+      <input id="sun_end" type="string" pattern="([0-1]?[0-9]|2[0-3]):[0-5][0-9]" />
+      <br />
+      <!-- Monday -->
+      <input type="checkbox" id="mon" value="Lun">
+      <label for="mon">&nbsp;Lunes</label>
+      <input id="mon_start" type="string" pattern="([0-1]?[0-9]|2[0-3]):[0-5][0-9]" />
+      <span>&nbsp;-&nbsp;</span>
+      <input id="mon_end" type="string" pattern="([0-1]?[0-9]|2[0-3]):[0-5][0-9]" />
+      <br />
+      <!-- Tuesday -->
+      <input type="checkbox" id="tue" value="Mar">
+      <label for="tue">&nbsp;Mártes</label>
+      <input id="tue_start" type="string" pattern="([0-1]?[0-9]|2[0-3]):[0-5][0-9]" />
+      <span>&nbsp;-&nbsp;</span>
+      <input id="tue_end" type="string" pattern="([0-1]?[0-9]|2[0-3]):[0-5][0-9]" />
+      <br />
+      <!-- Wednesday -->
+      <input type="checkbox" id="wed" value="Mie">
+      <label for="wed">&nbsp;Miércoles</label>
+      <input id="wed_start" type="string" pattern="([0-1]?[0-9]|2[0-3]):[0-5][0-9]" />
+      <span>&nbsp;-&nbsp;</span>
+      <input id="wed_end" type="string" pattern="([0-1]?[0-9]|2[0-3]):[0-5][0-9]" />
+      <br />
+      <!-- Thursday -->
+      <input type="checkbox" id="thu" value="Jue">
+      <label for="thu">&nbsp;Juéves</label>
+      <input id="thu_start" type="string" pattern="([0-1]?[0-9]|2[0-3]):[0-5][0-9]" />
+      <span>&nbsp;-&nbsp;</span>
+      <input id="thu_end" type="string" pattern="([0-1]?[0-9]|2[0-3]):[0-5][0-9]" />
+      <br />
+      <!-- Friday -->
+      <input type="checkbox" id="fri" value="Vie">
+      <label for="fri">&nbsp;Viernes</label>
+      <input id="fri_start" type="string" pattern="([0-1]?[0-9]|2[0-3]):[0-5][0-9]" />
+      <span>&nbsp;-&nbsp;</span>
+      <input id="fri_end" type="string" pattern="([0-1]?[0-9]|2[0-3]):[0-5][0-9]" />
+      <br />
+      <!-- Saturday -->
+      <input type="checkbox" id="sat" value="Sab">
+      <label for="sat">&nbsp;Sábado</label>
+      <input id="sat_start" type="string" pattern="([0-1]?[0-9]|2[0-3]):[0-5][0-9]" />
+      <span>&nbsp;-&nbsp;</span>
+      <input id="sat_end" type="string" pattern="([0-1]?[0-9]|2[0-3]):[0-5][0-9]" />
+      <br />
+      <!-- Holiday -->
+      <input type="checkbox" id="hol" value="Fes">
+      <label for="hol">&nbsp;Festivos</label>
+      <input id="hol_start" type="string" pattern="([0-1]?[0-9]|2[0-3]):[0-5][0-9]" />
+      <span>&nbsp;-&nbsp;</span>
+      <input id="hol_end" type="string" pattern="([0-1]?[0-9]|2[0-3]):[0-5][0-9]" />
+      <br />
+      <!-- Switch -->
+      <!-- <label for="all_day">Todos los días a la misma hora</label> -->
+      <!-- <input type="checkbox" id="all_day" class="switch" value="Yes"> -->
+      <!-- Save -->
+      <button id="save_service">Guardar cambios</button>
+    </section>
+    <p id="load">Firebase SDK Loading&hellip;</p>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const loadEl = document.querySelector('#load');
+        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+        // // The Firebase SDK is initialized and available here!
+        //
+        // firebase.auth().onAuthStateChanged(user => { });
+        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
+        // firebase.firestore().doc('/foo/bar').get().then(() => { });
+        // firebase.functions().httpsCallable('yourFunction')().then(() => { });
+        // firebase.messaging().requestPermission().then(() => { });
+        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
+        // firebase.analytics(); // call to activate
+        // firebase.analytics().logEvent('tutorial_completed');
+        // firebase.performance(); // call to activate
+        //
+        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+
+        let expertId = null
+        const db = firebase.firestore();
+        const expertsRef = db.collection('experts');
+        const daysEl = document.querySelectorAll(".agenda input[type='checkbox']:not(.switch)")
+
+        firebase.auth()
+          .onAuthStateChanged(user => {
+            if (user) {
+              expertId = user.uid
+              expertsRef.doc(expertId)
+                .get()
+                .then((doc) => {
+                  let expert = {
+                    name: user.displayName,
+                    email: user.email,
+                    tele: user.phoneNumber,
+                    picture_url: user.photoURL,
+                    schedule: []
+                  } 
+                  if (doc.exists) {
+                    // Set updates
+                    expert = {
+                      ...doc.data(),
+                      ...expert
+                    }
+                    // Get scheduling 
+                    const { schedule } = doc.data()
+                    expert.schedule = schedule || expert.schedule 
+                    if (schedule) {
+                      const scheduleData = schedule.reduce((o, { label, from, to }) => ({...o, [label]: { from, to } }), {})
+                      // Prefill with data already saved
+                      daysEl.forEach(el => {
+                        if (scheduleData[el.value]) {
+                          const endEl = document.getElementById(`${el.id}_end`)
+                          const startEl = document.getElementById(`${el.id}_start`)
+                          el.checked = true
+                          endEl.disabled = startEl.disabled = false
+                          endEl.value = scheduleData[el.value].to
+                          startEl.value = scheduleData[el.value].from
+                        }
+                      });
+                    }
+                  }
+                  // Save
+                  expertsRef.doc(expertId).set(expert)
+                })
+                .catch((error) => {
+                  console.error(error)
+                  loadEl.textContent = 'Error trying to search for an existing User at Cloud Firestore, check the console.';
+                })
+            } else {
+              // Back to login
+              window.location.assign('/')
+            }
+          });
+        
+        const closeEl = document.getElementById('close');
+        closeEl.addEventListener('click', function () {
+          firebase.auth().signOut();
+        });
+
+        function toggleDays(el) {
+          const endEl = document.getElementById(`${el.id}_end`)
+          const startEl = document.getElementById(`${el.id}_start`)
+          endEl.disabled = startEl.disabled = !el.checked
+        }
+
+        // Prepare for input
+        daysEl.forEach(el => {
+          toggleDays(el)
+          el.addEventListener('click', function (e) {
+            toggleDays(e.target)
+          })
+        });
+
+        /* const switchEl = document.getElementById('all_day');
+        switchEl.addEventListener('click', function (e) {
+          el = e.target
+          if (el.checked) {
+          }
+        }) */
+
+        const saveEl = document.getElementById('save_service');
+        saveEl.addEventListener('click', function () {
+          // Grab all the fields
+          let invalid = true
+          const schedule = []
+          daysEl.forEach(el => {
+            if (el.checked) {
+              const endEl = document.getElementById(`${el.id}_end`)
+              const startEl = document.getElementById(`${el.id}_start`)
+              if (endEl.checkValidity() && startEl.checkValidity()) {
+                schedule.push({ label: el.value, from: startEl.value, to: endEl.value })
+              } else {
+                invalid = true
+                console.error({ el, message: 'Upper or Lower bound have invalid input', upper: endEl, lower: startEl })
+              }
+            }
+          })
+          if (invalid) {
+            // Save
+            expertsRef.doc(expertId).set({ schedule }, { merge: true })
+            window.location.assign('./onboarding.html')
+          } else {
+            loadEl.textContent = 'Error trying to save schedule, check the console.';
+          }
+        });
+
+        try {
+          let app = firebase.app();
+          let features = [
+            'auth', 
+            'database', 
+            'firestore',
+            'functions',
+            'messaging', 
+            'storage', 
+            'analytics', 
+            'remoteConfig',
+            'performance',
+          ].filter(feature => typeof app[feature] === 'function');
+          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
+        } catch (e) {
+          console.error(e);
+          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
+        }
+      });
+    </script>
+  </body>
+</html>

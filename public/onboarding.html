@@ -10,7 +10,7 @@
     <!-- include only the Firebase features as you need -->
     <script defer src="/__/firebase/8.6.5/firebase-auth.js"></script>
     <script defer src="/__/firebase/8.6.5/firebase-firestore.js"></script>
-    <script defer src="/__/firebase/8.6.5/firebase-storage.js"></script>
+    <!-- <script defer src="/__/firebase/8.6.5/firebase-storage.js"></script> -->
     <script defer src="/__/firebase/8.6.5/firebase-analytics.js"></script>
     <!-- 
       initialize the SDK after all desired features are loaded, set useEmulator to false
@@ -24,11 +24,13 @@
     <style media="screen">
       body { background: #ECEFF1; color: #3C3C3C; font-family: 'Poppins', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
       header { text-align: center; }
-      header .close { right: 50px; position: absolute; background: transparent; color: #FFA41D; border: 0; height: 20px; text-decoration: underline; cursor: pointer; }
+      header .back { left: 50px; }
+      header .close { right: 50px; }
+      header .close, header .back { position: absolute; background: transparent; color: #FFA41D; border: 0; height: 20px; text-decoration: underline; cursor: pointer; }
       header h1 { font-size: 20px; font-weight: 500; margin: 0 0 71px; color: #606060; }
       header h2 { font-family: 'Poppins'; font-size: 16px; letter-spacing: .002em; margin: 37px 0 18px; color: #FFA41D; }
       label { font-weight: 600; margin-bottom: 8px; }
-      label, input, select, button { font-family: 'Poppins'; font-size: 14px; line-height: 21px; display: block; }
+      label, input, select, button { font-family: 'Poppins'; font-size: 14px; line-height: 21px; display: block; border-radius: 4px; }
       .chips { margin: 0 auto; }
       .chips input[type='checkbox'] { display: inline; appearance: none; }
       .chips input[type='checkbox'] + label { --active: #606060; --bg: #FFFF; display: inline-block; vertical-align: top; font-size: 12px; font-weight: normal; line-height: 18px; letter-spacing: .002em; background: var(--bc, var(--bg)); color: var(--fg, var(--active)); border: 0.6px solid #606060; border-radius: 200px; padding: 7px 13px; cursor: pointer; }
@@ -36,14 +38,17 @@
       .chips input[type='checkbox']:disabled + label { cursor: not-allowed; opacity: .6; }
       .chips input[type='checkbox']:not(:checked):not(:disabled):hover + label { border-color: #FFA41D; }
       .details { background: #E5E5E5; padding: 23px 36px; margin: 36px auto 0; }
-      .details button { display: block; width: 100%; background: #FFA41D; color: #FFFF; padding: 12px; margin-top: 70px; border: 0; border-radius: 4px; filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.05)); cursor: pointer; }
-      .details input, .details select { font-weight: 400; margin-bottom: 16px; width: 100%; color: inherit; padding: 12px 17.5px; border: 0; border-radius: 4px; box-sizing: border-box; appearance: none; }
+      .details button { width: 100%; background: #FFA41D; color: #FFFF; padding: 12px; margin-top: 70px; border: 0; filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.05)); cursor: pointer; }
+      .details input, .details select { font-weight: 400; margin-bottom: 16px; width: 100%; color: inherit; padding: 12px 17.5px; border: 0; box-sizing: border-box; appearance: none; }
+      .details input:invalid { border: 1px solid #CD0B4A; }
       .details input:focus-visible, .details select:focus-visible { outline-color: #FFA41D; }
       .details, .chips { max-width: 421px; box-sizing: border-box; }
       #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
       @media (max-width: 600px) {
-        header .close { background: #FFA41D; color: #FFFF; border-radius: 100%; width: 20px; text-decoration: none; }
+        header .close { background: #FFA41D; color: #FFFF; border-radius: 100%; width: 20px; }
         header .close span:first-child { display: none; }
+        header .close, header .back { text-decoration: none; }
+        header .back span:nth-child(2) { display: none; }
         .chips { padding: 0 20px; }
         .details { background: none; max-width: 421px; padding: 20px; }
         .details input, .details select, .details button { max-width: 315px; }
@@ -52,6 +57,10 @@
   </head>
   <body>
     <header>
+      <button id="back" class="back" aria-label="Back">
+        <span aria-hidden="true">&larr;</span>
+        <span>Agenda</span>
+      </button>
       <button id="close" class="close" aria-label="Close">
         <span>Salir</span>
         <span aria-hidden="true">×</span>
@@ -95,11 +104,11 @@
         <option value="bussines">Establecimiento</option>
       </select>
       <label for="desc">Descripción: </label>
-      <input id="desc" type="text" />
+      <input id="desc" type="text" required />
       <label for="price">Precio: </label>
-      <input id="price" type="number" />
+      <input id="price" type="number" required />
       <label for="duration">Duración: </label>
-      <input id="duration" type="number" />
+      <input id="duration" type="number" required />
       <button id="save_service">Guardar cambios</button>
     </section>
     <p id="load">Firebase SDK Loading&hellip;</p>
@@ -122,39 +131,14 @@
         //
         // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
 
-        let expertData = null
         const db = firebase.firestore();
-        const expertsRef = db.collection('experts');
         const servicesRef = db.collection('services');
+        let expertData = null
 
         firebase.auth()
           .onAuthStateChanged(user => {
             if (user) {
-              expertsRef.doc(user.uid)
-                .get()
-                .then((doc) => {
-                  let expert = {
-                    name: user.displayName,
-                    email: user.email,
-                    tele: user.phoneNumber,
-                    picture_url: user.photoURL
-                  } 
-                  if (doc.exits) {
-                    // Set updates
-                    expert = {
-                      ...doc.data(),
-                      ...expert
-                    }
-                  }
-                  // Save
-                  expertsRef.doc(user.uid).set(expert)
-                  // Take fresh expert data to embed into service
-                  expertData = { id: user.uid, name: expert.name, picture_url: expert.picture_url }
-                })
-                .catch((error) => {
-                  console.error(error)
-                  loadEl.textContent = 'Error trying to search for an existing User at Cloud Firestore, check the console.';
-                })
+              expertData = { id: user.uid, name: user.displayName, picture_url: user.photoURL }
             } else {
               // Back to login
               window.location.assign('/')
@@ -176,29 +160,37 @@
               chips.push(el.value)
             }
           })
-          const data = {
-            desc: txtDesc.value,
-            type: enumType.value,
-            price: parseInt(numbPrice.value, 10),
-            duration: parseInt(numbDuration.value),
-            expert: expertData,
-            categories: chips
+          // Check for validity
+          if (textDesc.checkValidity() && numbPrice.checkValidity() && numbDuration.checkValidity()) {
+            const data = {
+              desc: txtDesc.value,
+              type: enumType.value,
+              price: parseInt(numbPrice.value, 10),
+              duration: parseInt(numbDuration.value),
+              expert: expertData,
+              categories: chips
+            }
+            // Save
+            servicesRef.doc().set(data)
+            // Clean
+            txtDesc.value = ''
+            numbPrice.value = ''
+            numbDuration.value = ''
+            enumType.selectedIndex = 0
+            chipsEl.forEach(el => {
+              el.checked = false
+            })
           }
-          // Save
-          servicesRef.doc().set(data)
-          // Clean
-          txtDesc.value = ''
-          numbPrice.value = ''
-          numbDuration.value = ''
-          enumType.selectedIndex = 0
-          chipsEl.forEach(el => {
-            el.checked = false
-          })
         });
 
         const closeEl = document.getElementById('close');
         closeEl.addEventListener('click', function () {
           firebase.auth().signOut();
+        });
+
+        const backEl = document.getElementById('back');
+        backEl.addEventListener('click', function () {
+          window.location.assign('./schedule.html')
         });
 
         try {
